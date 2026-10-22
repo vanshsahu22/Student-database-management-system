@@ -1,8 +1,7 @@
 #include <iostream>
-#include <vector>
-#include <string>
 #include <limits>
-#include <algorithm>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -26,49 +25,56 @@ private:
         return -1;
     }
 
-    static void clearInput() {
+    static void clearInputStream() {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
 
+    static bool isValidMarks(double value) {
+        return value >= 0.0 && value <= 100.0;
+    }
+
+    static string readText(const string& prompt) {
+        string value;
+        cout << prompt;
+        getline(cin, value);
+        return value;
+    }
+
 public:
     void addStudent() {
-        Student student{};
+        Student newStudent{};
 
         cout << "\nEnter roll number: ";
-        if (!(cin >> student.rollNumber)) {
-            cout << "Invalid roll number. Please enter a number.\n";
-            clearInput();
+        if (!(cin >> newStudent.rollNumber)) {
+            cout << "Invalid roll number. Please enter a valid number.\n";
+            clearInputStream();
             return;
         }
-        clearInput();
+        clearInputStream();
 
-        if (findStudentIndex(student.rollNumber) != -1) {
+        if (findStudentIndex(newStudent.rollNumber) != -1) {
             cout << "A student with this roll number already exists.\n";
             return;
         }
 
-        cout << "Enter student name: ";
-        getline(cin, student.name);
-
-        cout << "Enter course/branch: ";
-        getline(cin, student.course);
+        newStudent.name = readText("Enter student name: ");
+        newStudent.course = readText("Enter course/branch: ");
 
         cout << "Enter marks (0-100): ";
-        if (!(cin >> student.marks)) {
-            cout << "Invalid marks. Please enter a number.\n";
-            clearInput();
+        if (!(cin >> newStudent.marks)) {
+            cout << "Invalid marks. Please enter a numeric value.\n";
+            clearInputStream();
             return;
         }
-        clearInput();
+        clearInputStream();
 
-        if (student.name.empty() || student.course.empty() ||
-            student.marks < 0 || student.marks > 100) {
-            cout << "Invalid details. Name/course cannot be empty and marks must be 0-100.\n";
+        if (newStudent.name.empty() || newStudent.course.empty() || !isValidMarks(newStudent.marks)) {
+            cout << "Invalid details. Name/course cannot be empty and marks must be between 0 and 100.\n";
             return;
         }
 
-        students.push_back(student);
+        students.push_back(newStudent);
         cout << "Student added successfully.\n";
     }
 
@@ -92,13 +98,14 @@ public:
 
     void searchStudent() const {
         int rollNumber;
+
         cout << "\nEnter roll number to search: ";
         if (!(cin >> rollNumber)) {
             cout << "Invalid roll number.\n";
-            clearInput();
+            clearInputStream();
             return;
         }
-        clearInput();
+        clearInputStream();
 
         int index = findStudentIndex(rollNumber);
         if (index == -1) {
@@ -116,13 +123,14 @@ public:
 
     void updateStudent() {
         int rollNumber;
+
         cout << "\nEnter roll number to update: ";
         if (!(cin >> rollNumber)) {
             cout << "Invalid roll number.\n";
-            clearInput();
+            clearInputStream();
             return;
         }
-        clearInput();
+        clearInputStream();
 
         int index = findStudentIndex(rollNumber);
         if (index == -1) {
@@ -131,42 +139,40 @@ public:
         }
 
         Student& student = students[index];
-        string newName, newCourse;
-        double newMarks;
 
-        cout << "Enter new name: ";
-        getline(cin, newName);
-        cout << "Enter new course/branch: ";
-        getline(cin, newCourse);
+        string updatedName = readText("Enter new name: ");
+        string updatedCourse = readText("Enter new course/branch: ");
+
+        double updatedMarks;
         cout << "Enter new marks (0-100): ";
-
-        if (!(cin >> newMarks)) {
+        if (!(cin >> updatedMarks)) {
             cout << "Invalid marks.\n";
-            clearInput();
+            clearInputStream();
             return;
         }
-        clearInput();
+        clearInputStream();
 
-        if (newName.empty() || newCourse.empty() || newMarks < 0 || newMarks > 100) {
+        if (updatedName.empty() || updatedCourse.empty() || !isValidMarks(updatedMarks)) {
             cout << "Invalid details. Update cancelled.\n";
             return;
         }
 
-        student.name = newName;
-        student.course = newCourse;
-        student.marks = newMarks;
+        student.name = updatedName;
+        student.course = updatedCourse;
+        student.marks = updatedMarks;
         cout << "Student record updated successfully.\n";
     }
 
     void deleteStudent() {
         int rollNumber;
+
         cout << "\nEnter roll number to delete: ";
         if (!(cin >> rollNumber)) {
             cout << "Invalid roll number.\n";
-            clearInput();
+            clearInputStream();
             return;
         }
-        clearInput();
+        clearInputStream();
 
         int index = findStudentIndex(rollNumber);
         if (index == -1) {
@@ -178,35 +184,54 @@ public:
         cout << "Student record deleted successfully.\n";
     }
 
+    void showMenu() const {
+        cout << "\n====================================\n";
+        cout << "     STUDENT MANAGEMENT SYSTEM\n";
+        cout << "====================================\n";
+        cout << "1. Add student\n";
+        cout << "2. Display all students\n";
+        cout << "3. Search student by roll number\n";
+        cout << "4. Update student record\n";
+        cout << "5. Delete student record\n";
+        cout << "6. Exit\n";
+        cout << "Choose an option: ";
+    }
+
     void run() {
         int choice = 0;
+
         do {
-            cout << "\n====================================\n";
-            cout << "     STUDENT MANAGEMENT SYSTEM\n";
-            cout << "====================================\n";
-            cout << "1. Add student\n";
-            cout << "2. Display all students\n";
-            cout << "3. Search student by roll number\n";
-            cout << "4. Update student record\n";
-            cout << "5. Delete student record\n";
-            cout << "6. Exit\n";
-            cout << "Choose an option: ";
+            showMenu();
 
             if (!(cin >> choice)) {
                 cout << "Please enter a valid menu number.\n";
-                clearInput();
+                clearInputStream();
                 continue;
             }
-            clearInput();
+            clearInputStream();
 
             switch (choice) {
-                case 1: addStudent(); break;
-                case 2: displayStudents(); break;
-                case 3: searchStudent(); break;
-                case 4: updateStudent(); break;
-                case 5: deleteStudent(); break;
-                case 6: cout << "Thank you for using the Student Management System!\n"; break;
-                default: cout << "Invalid choice. Please select 1-6.\n";
+                case 1:
+                    addStudent();
+                    break;
+                case 2:
+                    displayStudents();
+                    break;
+                case 3:
+                    searchStudent();
+                    break;
+                case 4:
+                    updateStudent();
+                    break;
+                case 5:
+                    deleteStudent();
+                    break;
+                case 6:
+                    cout << "Thank you for using the Student Management System!\n";
+                    break;
+                default:
+                    cout << "Invalid choice. Please select a number from 1 to 6.\n";
+                    break;
             }
         } while (choice != 6);
     }
